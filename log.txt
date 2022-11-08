@@ -1,0 +1,22 @@
+1667912943: my-t w 40 4 0100
+1667913362: starting run
+1667913362: run number = 1
+1667913362: timestamp from server = 1667913362
+1667913362: run_type = 0 (CAL)
+1667913362: my-t w 40 4 0100
+1667913709: starting run
+1667913709: run number = 1
+1667913709: timestamp from server = 1667913709
+1667913709: run_type = 0 (CAL)
+1667913709: my-t w 40 4 0100
+1667913747: stopping run
+1667913747: my-t w 40 4 0000
+1667913807: stopping run
+1667913807: my-t w 40 4 0000
+1667913889: starting run
+1667913889: run number = 1
+1667913889: timestamp from server = 1667913889
+1667913889: run_type = 1 (BEAM)
+1667913889: my-t w 40 4 0100
+1667913898: stopping run
+1667913898: my-t w 40 4 0000

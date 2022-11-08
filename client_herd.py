@@ -22,10 +22,10 @@ try:
     # Send data
     ## data for HERD beam test
     run_number=1
-    #bt=0  # CAL
-    bt=1  # BEAM
-    #cmd="START"
-    cmd="STOP"
+    bt=0  # CAL
+    #bt=1  # BEAM
+    cmd="START"
+    #cmd="STOP"
     START_UNIX_TIME = int(time.time())
     print("START TIME", START_UNIX_TIME )
     data = [0xFF, 0x80, 0x00, 0x8]

@@ -14,7 +14,28 @@ import subprocess
 import datetime
 import time
 
+start_autotrigger = "my-t w 40 4 0100"
+stop_autotrigger = "my-t w 40 4 0000"
+start_eventpoll = "my-t w 1FF 1F0205 00 10 63 69 38 1E 00 00 03 E8 00 0C 02 9F 03 83 0B 00 00 04 08 13 0B 00"
+stop_eventpoll = "my-t w 1FF 1F0205 00 E0"
+
+pathL0 = "/amssw/duranti/AMSWireDAQ/trunkBT/DecodeL0/Data/L0/BLOCKS/PG/USBL0_PG_LEFV2BEAM1/"
+
 logfile = open('log.txt', 'a')
+
+def log_last_file(unixTime=0, moth_path="/"):
+    list_of_files = sorted(filter(lambda x: os.path.isdir(os.path.join(moth_path, x)), os.listdir(moth_path)))
+    #        for file_name in list_of_files:
+    #            print(file_name)
+    #        print(len(list_of_files))
+    #        print(list_of_files[len(list_of_files)-1])
+    list_of_files_sub = sorted(filter(lambda x: os.path.isfile(os.path.join(moth_path+list_of_files[len(list_of_files)-1], x)), os.listdir(moth_path+list_of_files[len(list_of_files)-1])))
+    #        for file_name in list_of_files_sub:
+    #            print(file_name)
+    #        print(len(list_of_files_sub))
+    #        print(list_of_files_sub[len(list_of_files_sub)-1])
+    logfile.write("%d: last file is %s\n" % (unixTime, moth_path+list_of_files[len(list_of_files)-1]+"/"+list_of_files_sub[len(list_of_files_sub)-1]))
+    return 0
 
 def send_command_and_log(cmd=0, run_number=0, timestamp=0, run_type=0):
 
@@ -48,13 +69,20 @@ def send_command_and_log(cmd=0, run_number=0, timestamp=0, run_type=0):
         logfile.write("%d: run number = %d\n" % (unixTime, run_number))
         logfile.write("%d: timestamp from server = %d\n" % (unixTime, timestamp))
         logfile.write("%d: run_type = %d (%s)\n" % (unixTime, run_type, run_type_s))
-        print(os.system("my-t w 40 4 0100")) #autotrigger
-        logfile.write("%d: my-t w 40 4 0100\n" % unixTime)
+        if run_type==0:
+            os.system(start_autotrigger)
+            logfile.write("%d: %s\n" % (unixTime, start_autotrigger))
+        os.system(start_eventpoll)
+        logfile.write("%d: %s\n" % (unixTime, start_eventpoll))
+        log_last_file(unixTime, pathL0)
     elif cmd==0: #STOP
         print("%d: stopping run" % unixTime)
         logfile.write("%d: stopping run\n" % unixTime)
-        print(os.system("my-t w 40 4 0000")) #stop autotrigger
-        logfile.write("%d: my-t w 40 4 0000\n" % unixTime)
+        os.system(stop_autotrigger)
+        logfile.write("%d: %s\n" % (unixTime, stop_autotrigger))
+        os.system(stop_eventpoll)
+        logfile.write("%d: %s\n" % (unixTime, stop_eventpoll))
+        log_last_file(unixTime, pathL0)
         time.sleep(60)
 
     return 0

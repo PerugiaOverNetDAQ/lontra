@@ -41,7 +41,7 @@ def get_last_file(mother_path="/"):
 
     #return 0
 
-def send_run_cmd(cmd, run_type, data_path):
+def send_run_cmd(cmd, run_type, data_path, log_file):
     # Create a TCP/IP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -80,7 +80,7 @@ def send_run_cmd(cmd, run_type, data_path):
         data.append( (CMD_UNIX_TIME >> 8) & 0xFF )
         data.append( (CMD_UNIX_TIME >> 0) & 0xFF )
 
-        with open("log.txt", 'a') as logfile:
+        with open(log_file, 'a') as logfile:
             logfile.write("%d: last file is %s\n" % (CMD_UNIX_TIME, f"{data_path}/{last_dir}/{last_file}"))
 
         msg = bytearray(data)

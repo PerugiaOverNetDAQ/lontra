@@ -1,12 +1,3 @@
-## server_herd.py
-# Author: L. Di Venere
-# This script should run on the PC controlling the DAQ of each subdetector
-# The script waits for the message from the client and executes the start or stop functions depending on the message content
-# If the execution of these function is successful, the server sends back the message to the client.
-#
-# NOTE: change the IP address in the script to the current IP address of the PC running this script (server).
-# NOTE: check the firewall configuration of the server pc, to be able to send/receive TCP/IP message over a specific port .
-
 import socket
 import sys
 import os
@@ -14,64 +5,12 @@ import subprocess
 import datetime
 import time
 
-cal_num = 0x00
-dat_num = 0x00
-
-# Read the values from runnum.conf
-with open("runnum.conf", "r") as f:
-    for line in f:
-        if line.startswith("cal_num"):
-            cal_num = line.split()[2]
-        elif line.startswith("dat_num"):
-            dat_num = line.split()[2]
-
-# Set Trigger number to 1 and clear Auto-trigger with local busy set
-clear_autotrigger = "my-t W 3C 4 02 01"
-
-# Clear circular buffer
-clear_circ_buffer = "my-t W 3C 14"
-
-# Read back trigger status
-read_trig_status = "my-t R 3C 4"
-
-# Read back buffer status
-read_buff_status = "my-t R 3C 14"
-
-# Start server DAQ
-# first  data: 00-FF
-# second data: CAL=0C, DAQ=0D
-start_cal_polling = "my-t W JMDC:SELF 1F0600 " + f"{cal_num:0{2}x}" + " 0C"
-start_dat_polling = "my-t W JMDC:SELF 1F0600 " + f"{dat_num:0{2}x}" + " 0D"
-
-# Set local busy to 0 to enable trigger coming
-set_busy_off = "my-t W 3C 4 00 01"
-
-# Stop trigger by set local busy to 1
-set_busy_on = "my-t W 3C 4 02 01"
-
-# Stop server DAQ
-stop_eventpoll = "my-t W JMDC:SELF 1F0601"
-
-pathL0 = "/Data/BLOCKS/USBLF_PCGSC03/"
-
-logfile = open('log.txt', 'a')
-
-def log_last_file(unixTime=0, moth_path="/"):
-    list_of_files = sorted(filter(lambda x: os.path.isdir(os.path.join(moth_path, x)), os.listdir(moth_path)))
-    #        for file_name in list_of_files:
-    #            print(file_name)
-    #        print(len(list_of_files))
-    #        print(list_of_files[len(list_of_files)-1])
-    list_of_files_sub = sorted(filter(lambda x: os.path.isfile(os.path.join(moth_path+list_of_files[len(list_of_files)-1], x)), os.listdir(moth_path+list_of_files[len(list_of_files)-1])))
-    #        for file_name in list_of_files_sub:
-    #            print(file_name)
-    #        print(len(list_of_files_sub))
-    #        print(list_of_files_sub[len(list_of_files_sub)-1])
-    logfile.write("%d: last file is %s\n" % (unixTime, moth_path+list_of_files[len(list_of_files)-1]+"/"+list_of_files_sub[len(list_of_files_sub)-1]))
-    return 0
-
-def send_command_and_log(cmd=0, run_number=0, timestamp=0, run_type=0):
-
+from L0 import (
+    clear_autotrigger, clear_circ_buffer, read_trig_status, read_buff_status,
+    stop_eventpoll, set_busy_off, set_busy_on, execute_command, log_last_file
+)
+def send_command_and_log(cmd, timestamp, run_type, cal_num, dat_num, logfile, pathL0, start_cal_polling, start_dat_polling):
+                         
     print('received run_number %i' % run_number, file=sys.stderr)
     print('received run_type %i' % run_type, file=sys.stderr)
     print('received cmd %i' % cmd, file=sys.stderr)
@@ -96,38 +35,37 @@ def send_command_and_log(cmd=0, run_number=0, timestamp=0, run_type=0):
 
     if cmd==1: #START
         print("%d: starting run" % unixTime)
-        print("%d: run number = %d" % (unixTime, run_number))
+        print("%d: run number = %d" % (unixTime, {cal_num if run_type==0 else dat_num}))
         print("%d: timestamp from server = %d" % (unixTime, timestamp))
         print("%d: run_type = %d (%s)" % (unixTime, run_type, run_type_s))
         logfile.write("%d: starting run\n" % unixTime)
-        logfile.write("%d: run number = %d\n" % (unixTime, run_number))
+        logfile.write("%d: run number = %d\n" % (unixTime, {cal_num if run_type==0 else dat_num}))
         logfile.write("%d: timestamp from server = %d\n" % (unixTime, timestamp))
         logfile.write("%d: run_type = %d (%s)\n" % (unixTime, run_type, run_type_s))
-        os.system(clear_autotrigger)
-        os.system(clear_circ_buffer)
-        os.system(read_trig_status)
-        os.system(read_buff_status)
-        if run_type==0:	
-            os.system(start_cal_polling)
-            logfile.write("%d: %s\n" % (unixTime, start_cal_polling))
-        else:
-            os.system(start_dat_polling)
-            logfile.write("%d: %s\n" % (unixTime, start_dat_polling))
-        os.system(set_busy_off)
-        os.system(read_trig_status)
-        log_last_file(unixTime, pathL0)
+        logfile.write(f"{unixTime}: {start_cal_polling if run_type == 0 else start_dat_polling}\n")
+
+        execute_command(clear_autotrigger)
+        execute_command(clear_circ_buffer)
+        execute_command(read_trig_status)
+        execute_command(read_buff_status)
+        execute_command(start_cal_polling if run_type == 0 else start_dat_polling)
+        execute_command(set_busy_off)
+        execute_command(read_trig_status)
+        log_last_file(logfile, unixTime, pathL0)
+
     elif cmd==0: #STOP
         print("%d: stopping run" % unixTime)
         logfile.write("%d: stopping run\n" % unixTime)
-        os.system(set_busy_on)
-        os.system(read_trig_status)
-        os.system(read_buff_status)
-        os.system(stop_eventpoll)
-        logfile.write("%d: %s\n" % (unixTime, stop_eventpoll))
-        log_last_file(unixTime, pathL0)
-        time.sleep(60)
 
-    return 0
+        execute_command(set_busy_on)
+        execute_command(read_trig_status)
+        execute_command(read_buff_status)
+        execute_command(stop_eventpoll)
+        logfile.write(f"{unixTime}: stopping eventpoll\n")
+        logfile.write(f"{unixTime}: {stop_eventpoll}\n")
+        log_last_file(logfile, unixTime, pathL0)
+        time.sleep(60)
+        return 0
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -5,26 +5,7 @@ from L0 import (
     clear_autotrigger, clear_circ_buffer, read_trig_status, read_buff_status,
     stop_eventpoll, set_busy_off, execute_command, log_last_file
 )
-
-# Initialize variables
-cal_num = 0
-dat_num = 0
-
-# Read the values from runnum.conf
-with open("runnum.conf", "r") as f:
-    for line in f:
-        if line.startswith("cal_num"):
-            cal_num = int(line.split()[2])
-        elif line.startswith("dat_num"):
-            dat_num = int(line.split()[2])
-
-# Define paths and start polling commands
-start_cal_polling = f"my-t W JMDC-SELF 1F0600 {cal_num:02x} 0C"
-start_dat_polling = f"my-t W JMDC-SELF 1F0600 {dat_num:02x} 0D"
-pathL0 = "/Data/BLOCKS/USBLF_PCGSC03/"
-logfile = open('log.txt', 'a')
-
-def send_command_and_log(timestamp=0, run_type=0):
+def send_command_and_log(timestamp, run_type, cal_num, dat_num, logfile, pathL0, start_cal_polling, start_dat_polling):
     unixTime = int(time.time())
     logfile.write(f"{unixTime}: starting run\n")
     
@@ -53,9 +34,29 @@ def send_command_and_log(timestamp=0, run_type=0):
     log_last_file(logfile, unixTime, pathL0)
 
 if __name__ == '__main__':
+    cal_num = 00
+    dat_num = 00
+
+    # Read the values from runnum.conf
+    with open("runnum.conf", "r") as f:
+        for line in f:
+            if line.startswith("cal_num"):
+                cal_num = int(line.split()[2])
+            elif line.startswith("dat_num"):
+                dat_num = int(line.split()[2])
+
+    logfile = open('log.txt', 'a')
+    pathL0 = "/Data/BLOCKS/USBLF_PCGSC03/"
+
     if len(sys.argv) < 2:
         print("Usage: python start_L0.py <run_type (0 CAL; 1 DAT)>")
         sys.exit(0)
     else:
+        # Define paths and start polling commands
+        start_cal_polling = f"my-t W JMDC-SELF 1F0600 {cal_num:02x} 0C"
+        start_dat_polling = f"my-t W JMDC-SELF 1F0600 {dat_num:02x} 0D"
+
         run_type = int(sys.argv[1])
-        send_command_and_log(0, run_type)
+        send_command_and_log(0, run_type, cal_num, dat_num, logfile, pathL0, start_cal_polling, start_dat_polling)
+
+    logfile.close()

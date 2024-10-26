@@ -134,7 +134,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Bind the socket to the port
 #server_address = ('127.0.0.1', 10000) ## CHANGE HERE THE IP ADDRESS OF THE SERVER PC.
-server_address = ('', 10000) ## CHANGE HERE THE IP ADDRESS OF THE SERVER PC.
+server_address = ('192.168.0.60', 10000) ## CHANGE HERE THE IP ADDRESS OF THE SERVER PC.
 print( 'starting up on %s port %s' % server_address, file=sys.stderr)
 sock.bind(server_address)
 

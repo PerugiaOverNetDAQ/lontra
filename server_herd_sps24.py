@@ -24,9 +24,9 @@ with open("runnum.conf", "r") as f:
             cal_num = line.split()[2]
         elif line.startswith("dat_num"):
             dat_num = line.split()[2]
-            
+
 # Set Trigger number to 1 and clear Auto-trigger with local busy set
-clear_autotrigger = "mt-t W 3C 4 02 01"
+clear_autotrigger = "my-t W 3C 4 02 01"
 
 # Clear circular buffer
 clear_circ_buffer = "my-t W 3C 14"
@@ -40,8 +40,8 @@ read_buff_status = "my-t R 3C 14"
 # Start server DAQ
 # first  data: 00-FF
 # second data: CAL=0C, DAQ=0D
-start_cal_polling = "mt-t W JMDC:SELF 1F0600 " + f"{cal_num:0{2}x}" + " 0C"
-start_dat_polling = "mt-t W JMDC:SELF 1F0600 " + f"{dat_num:0{2}x}" + " 0D"
+start_cal_polling = "my-t W JMDC:SELF 1F0600 " + f"{cal_num:0{2}x}" + " 0C"
+start_dat_polling = "my-t W JMDC:SELF 1F0600 " + f"{dat_num:0{2}x}" + " 0D"
 
 # Set local busy to 0 to enable trigger coming
 set_busy_off = "my-t W 3C 4 00 01"

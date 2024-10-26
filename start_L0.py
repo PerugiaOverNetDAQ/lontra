@@ -8,12 +8,7 @@ from L0 import (
 def send_command_and_log(timestamp, run_type, cal_num, dat_num, logfile, pathL0, start_cal_polling, start_dat_polling):
     unixTime = int(time.time())
     logfile.write(f"{unixTime}: starting run\n")
-    
-    execute_command(clear_autotrigger)
-    execute_command(clear_circ_buffer)
-    execute_command(read_trig_status)
-    execute_command(read_buff_status)
-    execute_command(start_cal_polling if run_type == 0 else start_dat_polling)
+
     # Update cal_num and dat_num
     if run_type == 0:
         cal_num += 1
@@ -29,6 +24,12 @@ def send_command_and_log(timestamp, run_type, cal_num, dat_num, logfile, pathL0,
         f.write("cal_num = " + str(cal_num) + "\n")
         f.write("dat_num = " + str(dat_num) + "\n")
     logfile.write(f"{unixTime}: {start_cal_polling if run_type == 0 else start_dat_polling}\n")
+
+    execute_command(clear_autotrigger)
+    execute_command(clear_circ_buffer)
+    execute_command(read_trig_status)
+    execute_command(read_buff_status)
+    execute_command(start_cal_polling if run_type == 0 else start_dat_polling)
     execute_command(set_busy_off)
     execute_command(read_trig_status)
     log_last_file(logfile, unixTime, pathL0)

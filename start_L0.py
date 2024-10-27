@@ -5,7 +5,7 @@ from L0 import (
     clear_autotrigger, clear_circ_buffer, read_trig_status, read_buff_status,
     stop_eventpoll, set_busy_off, execute_command, log_last_file
 )
-def send_command_and_log(timestamp, run_type, cal_num, dat_num, logfile, pathL0, start_cal_polling, start_dat_polling):
+def send_start_command_and_log(timestamp, run_type, cal_num, dat_num, logfile, pathL0, start_cal_polling, start_dat_polling):
     unixTime = int(time.time())
     logfile.write(f"{unixTime}: starting run\n")
 
@@ -58,6 +58,6 @@ if __name__ == '__main__':
         start_dat_polling = f"my-t W JMDC-SELF 1F0600 {dat_num:02x} 0D"
 
         run_type = int(sys.argv[1])
-        send_command_and_log(0, run_type, cal_num, dat_num, logfile, pathL0, start_cal_polling, start_dat_polling)
+        send_start_command_and_log(0, run_type, cal_num, dat_num, logfile, pathL0, start_cal_polling, start_dat_polling)
 
     logfile.close()

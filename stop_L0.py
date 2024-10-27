@@ -8,7 +8,7 @@ from L0 import (
 pathL0 = "/Data/BLOCKS/USBLF_PCGSC03/"
 logfile = open('log.txt', 'a')
 
-def send_command_and_log(timestamp=0):
+def send_stop_command_and_log(timestamp=0):
     unixTime = int(time.time())
     logfile.write(f"{unixTime}: stopping run\n")
 
@@ -22,4 +22,4 @@ def send_command_and_log(timestamp=0):
     time.sleep(60)
 
 if __name__ == '__main__':
-    send_command_and_log(0)
+    send_stop_command_and_log(0)

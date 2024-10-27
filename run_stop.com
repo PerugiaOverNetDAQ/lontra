@@ -8,5 +8,5 @@ R 3C 4
 R 3C 14
 
 // Stop server DAQ
-W JMDC:SELF 1F0601
+W JMDC-SELF 1F0601
 

@@ -1,11 +1,21 @@
 import socket
-import sys
 import datetime
+import time
+import sys
+
+sys.path.append('/home/ams/N1081B-AMSL0-TB/')
+import enable_daq_trigger.py
+import enable_calibration_trigger.py
+import disable_all_triggers.py
 
 from L0 import (
     clear_autotrigger, clear_circ_buffer, read_trig_status, read_buff_status,
     stop_eventpoll, set_busy_on, set_busy_off, execute_command, log_last_file
 )
+
+logfile = open('log.txt', 'a')
+pathL0 = "/Data/BLOCKS/USBLF_PCGSC03/"
+
 
 def send_start_command_and_log(master_timestamp, run_type, cal_num, dat_num, logfile, pathL0, start_polling_command):
     unixTime = int(time.time())
@@ -38,11 +48,18 @@ def send_start_command_and_log(master_timestamp, run_type, cal_num, dat_num, log
     execute_command(read_trig_status)
     log_last_file(logfile, unixTime, pathL0)
 
-def send_stop_command_and_log(master_timestamp):
+    if run_type == 0:
+        enable_calibration_trigger();
+    else:
+        enable_daq_trigger();
+    
+def send_stop_command_and_log(master_timestamp, logfile, pathLO):
     unixTime = int(time.time())
     logfile.write(f"{unixTime}: received STOP with master timestamp {master_timestamp}\n")
     logfile.write(f"{unixTime}: stopping run\n")
 
+    disable_all_triggers()    
+    
     execute_command(set_busy_on)
     execute_command(read_trig_status)
     execute_command(read_buff_status)
@@ -52,7 +69,7 @@ def send_stop_command_and_log(master_timestamp):
     log_last_file(logfile, unixTime, pathL0)
     time.sleep(60)
 
-
+    
 if __name__ == '__main__':
 
     cal_num = 00
@@ -66,14 +83,13 @@ if __name__ == '__main__':
             elif line.startswith("dat_num"):
                 dat_num = int(line.split()[2])
 
-    logfile = open('log.txt', 'a')
-    pathL0 = "/Data/BLOCKS/USBLF_PCGSC03/"
 
     # Create a TCP/IP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     # Bind the socket to the port
-    server_address = ('192.168.0.60', 8888)  # CHANGE HERE THE IP ADDRESS OF THE SERVER PC.
+#    server_address = ('192.168.0.60', 8888)  # CHANGE HERE THE IP ADDRESS OF THE SERVER PC.
+    server_address = ('', 8888)  # CHANGE HERE THE IP ADDRESS OF THE SERVER PC.
     print("starting up on %s port %s" % server_address, file=sys.stderr)
     sock.bind(server_address)
     # Listen for incoming connections
@@ -112,14 +128,14 @@ if __name__ == '__main__':
                         # trigType: 0 = CAL, 1 = BEAM
                         # cmd: 0 = start, 1 = stop
 
-                        date = complete_message[0:8]
-                        time = complete_message[8:12]
+                        rundate = complete_message[0:8]
+                        runtime = complete_message[8:12]
                         trigType = complete_message[13]
                         cmd = complete_message[15]
 
                         # Convert date and time to unix timestamp
-                        date_obj = datetime.datetime.strptime(date, '%Y%m%d')
-                        time_obj = datetime.datetime.strptime(time, '%H%M')
+                        date_obj = datetime.datetime.strptime(rundate, '%Y%m%d')
+                        time_obj = datetime.datetime.strptime(runtime, '%H%M')
                         master_timestamp = int(datetime.datetime.timestamp(date_obj) + datetime.timedelta(hours=time_obj.hour, minutes=time_obj.minute).total_seconds())
                         print(f'master_timestamp: {master_timestamp}', file=sys.stderr)
                         print(f'trigType: {trigType}', file=sys.stderr)
@@ -130,9 +146,9 @@ if __name__ == '__main__':
                         start_dat_polling = f"my-t W JMDC-SELF 1F0600 {dat_num:02x} 0D"
 
                         if cmd == '0':
-                            send_start_command_and_log(master_timestamp, trigType, cal_num, dat_num, logfile, pathL0, start_cal_polling if trigType == 0 else start_dat_polling)
+                            send_start_command_and_log(master_timestamp, trigType, cal_num, dat_num, logfile, pathL0, start_cal_polling if trigType == '0' else start_dat_polling)
                         elif cmd == '1':
-                            send_stop_command_and_log(master_timestamp)
+                            send_stop_command_and_log(master_timestamp, logfile, pathL0)
 
                         # Clear the buffer after processing
                         data_buffer = b''

@@ -41,12 +41,13 @@ def get_last_file(mother_path="/"):
 
     #return 0
 
-def send_run_cmd(cmd, run_type, data_path, log_file):
+def CT_send_run_cmd(cmd, run_type, data_path, log_file):
     # Create a TCP/IP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # Connect the socket to the port where the server is listening
-    server_address = ('127.0.0.1', 8888) ## SET THE IP ADDRESS OF THE SERVER PC
+#    server_address = ('127.0.0.1', 8888) ## SET THE IP ADDRESS OF THE SERVER PC
+    server_address = ('128.141.149.213', 9999) ## SET THE IP ADDRESS OF THE SERVER PC
     print ('connecting to %s port %s' % server_address, file=sys.stderr)
     sock.connect(server_address)
 

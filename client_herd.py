@@ -24,53 +24,57 @@ try:
     run_number=1
     bt=0  # CAL
     #bt=1  # BEAM
-    cmd="START"
-    #cmd="STOP"
-    START_UNIX_TIME = int(time.time())
-    print("START TIME", START_UNIX_TIME )
-    data = [0xFF, 0x80, 0x00, 0x8]
-    data.append( (run_number >> 8) & 0xFF )
-    data.append( (run_number >> 0) & 0xFF )
-    data.append( (bt >> 8) & 0xFF )
-    data.append( (bt >> 0) & 0xFF )
-    if cmd == "START":
-        data.append(0xEE)
-        data.append(0x0)
-        data.append(0x0)
-        data.append(0x1)
-    else:
-        data.append(0xEE)
-        data.append(0x0)
-        data.append(0x0)
-        data.append(0x0)
+#    cmd=0 #"START"
+    cmd=1 #"STOP"
 
-    data.append( (START_UNIX_TIME >> 24) & 0xFF )
-    data.append( (START_UNIX_TIME >> 16) & 0xFF )
-    data.append( (START_UNIX_TIME >> 8) & 0xFF )
-    data.append( (START_UNIX_TIME >> 0) & 0xFF )
+    data = '202411041850_'+str(bt)+'_'+str(cmd)
     
-    msg = bytearray(data)
+#    START_UNIX_TIME = int(time.time())
+#    print("START TIME", START_UNIX_TIME )
+#    data = [0xFF, 0x80, 0x00, 0x8]
+#    data.append( (run_number >> 8) & 0xFF )
+#    data.append( (run_number >> 0) & 0xFF )
+#    data.append( (bt >> 8) & 0xFF )
+#    data.append( (bt >> 0) & 0xFF )
+#    if cmd == "START":
+#        data.append(0xEE)
+#        data.append(0x0)
+#        data.append(0x0)
+#        data.append(0x1)
+#    else:
+#        data.append(0xEE)
+#        data.append(0x0)
+#        data.append(0x0)
+#        data.append(0x0)
+
+#    data.append( (START_UNIX_TIME >> 24) & 0xFF )
+#    data.append( (START_UNIX_TIME >> 16) & 0xFF )
+#    data.append( (START_UNIX_TIME >> 8) & 0xFF )
+#    data.append( (START_UNIX_TIME >> 0) & 0xFF )
+    
+#    msg = bytearray(data)
+    msg = data.encode()
     print("data to be sent")
     print (data)
     print (msg)
-    sock.sendall(msg)
+    sock.sendall(msg+b'\n')
 
-    # Look for the response
-    amount_received = 0
-    amount_expected = len(msg)
-    while amount_received < amount_expected:
-        data = sock.recv(16)
-        amount_received += len(data)
-        print ( 'received "%s"' % data) #, file=sys.stderr)
-
-        #run_number = int.from_bytes(data[4:6], "big")
-        #run_type = int.from_bytes(data[6:8], "big")
-        #cmd = int.from_bytes(data[11:12], "big")
-        #timestamp = int.from_bytes(data[12:16], "big")
-        #print ( 'received run_number "%s"' % run_number, file=sys.stderr)
-        #print ( 'received run_type "%s"' % run_type, file=sys.stderr)
-        #print ( 'received cmd "%s"' % cmd, file=sys.stderr)
-        #print ( 'received timestamp "%s"' % timestamp, file=sys.stderr)
+#    # Look for the response
+#    amount_received = 0
+#    amount_expected = len(msg)
+#    while amount_received < amount_expected:
+#        data = sock.recv(16)
+#        amount_received += len(data)
+#        print ( 'received "%s"' % data) #, file=sys.stderr)
+#
+#        #run_number = int.from_bytes(data[4:6], "big")
+#        #run_type = int.from_bytes(data[6:8], "big")
+#        #cmd = int.from_bytes(data[11:12], "big")
+#        #timestamp = int.from_bytes(data[12:16], "big")
+#        #print ( 'received run_number "%s"' % run_number, file=sys.stderr)
+#        #print ( 'received run_type "%s"' % run_type, file=sys.stderr)
+#        #print ( 'received cmd "%s"' % cmd, file=sys.stderr)
+#        #print ( 'received timestamp "%s"' % timestamp, file=sys.stderr)
 
 finally:
     print ('closing socket', file=sys.stderr)

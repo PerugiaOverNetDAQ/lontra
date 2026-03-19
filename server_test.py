@@ -1,5 +1,6 @@
-## server_herd.py
-# Author: L. Di Venere
+## server_test.py
+# Original author: L. Di Venere
+# Author: M. Duranti
 # This script should run on the PC controlling the DAQ of each subdetector
 # The script waits for the message from the client and executes the start or stop functions depending on the message content
 # If the execution of these function is successful, the server sends back the message to the client.
@@ -14,36 +15,40 @@ import subprocess
 import datetime
 import time
 
-start_autotrigger = "<command1>"
-stop_autotrigger = "<command2>"
-start_eventpoll = "<command3>"
-stop_eventpoll = "<command4>"
+####### to be customized ######################
+start_autotrigger = "echo start_autotrigger"
+stop_autotrigger = "echo stop_autotrigger"
+start_eventpoll = "echo start_eventpoll"
+stop_eventpoll = "echo stop_eventpoll"
+###############################################
 
-path_to_watch_for_log = "./"
+path_to_watch_for_log = "./Data"
 
 logfile = open('log.txt', 'a')
 
 #this was for AMS-L0. This is custom
 def log_last_file(unixTime=0, moth_path="/"):
     list_of_files = sorted(filter(lambda x: os.path.isdir(os.path.join(moth_path, x)), os.listdir(moth_path)))
-    #        for file_name in list_of_files:
-    #            print(file_name)
-    #        print(len(list_of_files))
-    #        print(list_of_files[len(list_of_files)-1])
+#    for file_name in list_of_files:
+#        print(file_name)
+#    print(len(list_of_files))
+#    print(list_of_files[len(list_of_files)-1])
     list_of_files_sub = sorted(filter(lambda x: os.path.isfile(os.path.join(moth_path+list_of_files[len(list_of_files)-1], x)), os.listdir(moth_path+list_of_files[len(list_of_files)-1])))
-    #        for file_name in list_of_files_sub:
-    #            print(file_name)
-    #        print(len(list_of_files_sub))
-    #        print(list_of_files_sub[len(list_of_files_sub)-1])
+#    for file_name in list_of_files_sub:
+#        print(file_name)
+#    print(len(list_of_files_sub))
+#    print(list_of_files_sub[len(list_of_files_sub)-1])
     logfile.write("%d: last file is %s\n" % (unixTime, moth_path+list_of_files[len(list_of_files)-1]+"/"+list_of_files_sub[len(list_of_files_sub)-1]))
     return 0
 
 def send_command_and_log(cmd=0, run_number=0, timestamp=0, run_type=0):
 
+    print( '###send_command_and_log###')
     print('received run_number %i' % run_number, file=sys.stderr)
     print('received run_type %i' % run_type, file=sys.stderr)
     print('received cmd %i' % cmd, file=sys.stderr)
     print('received timestamp %i' % timestamp, file=sys.stderr)
+    print( '##########################')
 
     run_type_s = "UNDEF"
     if run_type==0:
@@ -75,7 +80,7 @@ def send_command_and_log(cmd=0, run_number=0, timestamp=0, run_type=0):
             logfile.write("%d: %s\n" % (unixTime, start_autotrigger))
         os.system(start_eventpoll)
         logfile.write("%d: %s\n" % (unixTime, start_eventpoll))
-        log_last_file(unixTime, path_to_watch_for_log)
+        log_last_file(unixTime, path_to_watch_for_log+"/")
     elif cmd==0: #STOP
         print("%d: stopping run" % unixTime)
         logfile.write("%d: stopping run\n" % unixTime)
@@ -83,8 +88,9 @@ def send_command_and_log(cmd=0, run_number=0, timestamp=0, run_type=0):
         logfile.write("%d: %s\n" % (unixTime, stop_autotrigger))
         os.system(stop_eventpoll)
         logfile.write("%d: %s\n" % (unixTime, stop_eventpoll))
-        log_last_file(unixTime, path_to_watch_for_log)
-        time.sleep(60)
+        log_last_file(unixTime, path_to_watch_for_log+"/")
+        #to be sure that after a stop there's some grace time
+#        time.sleep(60)
 
     return 0
 
@@ -117,13 +123,15 @@ while True:
                 run_type = int.from_bytes(data[6:8], "big")
                 cmd = int.from_bytes(data[11:12], "big")
                 timestamp = int.from_bytes(data[12:16], "big")
+                print ( '#######CMD RCV LOOP#######')
                 print ( 'received run_number %i' % run_number, file=sys.stderr)
                 print ( 'received run_type %i' % run_type, file=sys.stderr)
                 print ( 'received cmd %i' % cmd, file=sys.stderr)
                 print ( 'received timestamp %i' % timestamp, file=sys.stderr)
+                print ( '##########################')
                 send_command_and_log(cmd, run_number, timestamp, run_type)
                 #print (sys.stderr, 'sending data back to the client')
-                connection.sendall(data)
+#                connection.sendall(data)
             else:
                 print ('no more data from', client_address, file=sys.stderr)
                 break

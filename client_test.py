@@ -14,7 +14,10 @@ import time
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect the socket to the port where the server is listening
-server_address = ('127.0.0.1', 8888) ## SET THE IP ADDRESS OF THE SERVER PC
+#server_address = ('127.0.0.1', 8888) ## SET THE IP ADDRESS OF THE SERVER PC
+#server_address = ('127.0.0.1', 10000) ## SET THE IP ADDRESS OF THE SERVER PC
+#server_address = ('10.25.128.48', 10000) ## SET THE IP ADDRESS OF THE SERVER PC
+server_address = ('194.12.130.35', 10000) ## SET THE IP ADDRESS OF THE SERVER PC
 print ('connecting to %s port %s' % server_address, file=sys.stderr)
 sock.connect(server_address)
 
@@ -26,6 +29,25 @@ try:
     #bt=1  # BEAM
 #    cmd=0 #"START"
     cmd=1 #"STOP"
+    #cmd="START"
+    cmd="STOP"
+    START_UNIX_TIME = int(time.time())
+    print("START TIME", START_UNIX_TIME )
+    data = [0xFF, 0x80, 0x00, 0x8]
+    data.append( (run_number >> 8) & 0xFF )
+    data.append( (run_number >> 0) & 0xFF )
+    data.append( (bt >> 8) & 0xFF )
+    data.append( (bt >> 0) & 0xFF )
+    if cmd == "START":
+        data.append(0xEE)
+        data.append(0x0)
+        data.append(0x0)
+        data.append(0x1)
+    else:
+        data.append(0xEE)
+        data.append(0x0)
+        data.append(0x0)
+        data.append(0x0)
 
     data = '202411041850_'+str(bt)+'_'+str(cmd)
     

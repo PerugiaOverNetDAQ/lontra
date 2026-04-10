@@ -83,6 +83,7 @@ def CT_send_run_cmd(cmd, run_type, data_path, log_file):
 
         with open(log_file, 'a') as logfile:
             logfile.write("%d: last file is %s\n" % (CMD_UNIX_TIME, f"{data_path}/{last_dir}/{last_file}"))
+            logfile.flush()
 
         msg = bytearray(data)
         print("data to be sent")

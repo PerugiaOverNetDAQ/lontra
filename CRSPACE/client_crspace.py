@@ -18,14 +18,9 @@ SERVERS = [
     ("127.0.0.1", 8888),
 ]
 
-try:
-    # Controllo argomenti da riga di comando
-    if len(sys.argv) < 3:
-        print("Uso: python client_herd.py <run_type: BEAM|CAL> <cmd: START|STOP>", file=sys.stderr)
-        sys.exit(1)
-
-    run_type = sys.argv[1].upper()
-    cmd = sys.argv[2].upper()
+def send_command(run_type, cmd):
+    run_type = run_type.upper()
+    cmd = cmd.upper()
 
     if run_type not in ["BEAM", "CAL"]:
         raise ValueError(f"run_type non valido: {run_type}. Usa 'BEAM' o 'CAL'.")
@@ -123,5 +118,9 @@ try:
             for key, val in config.items():
                 f.write(f"{key} = {val}\n")
 
-finally:
-    print("end")
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Uso: python client_herd.py <run_type: BEAM|CAL> <cmd: START|STOP>", file=sys.stderr)
+        sys.exit(1)
+
+    send_command(sys.argv[1], sys.argv[2])

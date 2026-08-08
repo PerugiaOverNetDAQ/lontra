@@ -96,11 +96,11 @@ def send_command(run_type, cmd):
         
             run_number = int.from_bytes(data[4:6], "big")
             run_type = int.from_bytes(data[6:8], "big")
-            cmd = int.from_bytes(data[11:12], "big")
+            command = int.from_bytes(data[11:12], "big")
             timestamp = int.from_bytes(data[12:16], "big")
             print ( 'received run_number "%s"' % run_number, file=sys.stderr)
             print ( 'received run_type "%s"' % run_type, file=sys.stderr)
-            print ( 'received cmd "%s"' % cmd, file=sys.stderr)
+            print ( 'received command "%s"' % command, file=sys.stderr)
             print ( 'received timestamp "%s"' % timestamp, file=sys.stderr)
 
         except Exception as e:
@@ -116,7 +116,7 @@ def send_command(run_type, cmd):
         config[key_to_use] += 1
         with open("runnum.conf", "w") as f:
             for key, val in config.items():
-                f.write(f"{key} = {val}\n")
+                f.write(f"{key}={val}\n")
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:

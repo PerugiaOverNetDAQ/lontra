@@ -116,7 +116,7 @@ def send_command(run_type, cmd):
         config[key_to_use] += 1
         with open("runnum.conf", "w") as f:
             for key, val in config.items():
-                f.write(f"{key}={val}\n")
+                f.write(f"{key} = {val}\n")
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:

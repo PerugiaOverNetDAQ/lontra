@@ -12,10 +12,10 @@ import time
 
 # Lista dei server con cui comunicare (IP/hostname, porta)
 SERVERS = [
-    #("thinkbook-15-g2-itl.dyndns.cern.ch", 9999),
-    #("128.141.148.75", 10000),
-    # ("10.25.128.48", 10000),
-    ("127.0.0.1", 8888),
+    ("nmori-laptop-lab2.dyndns.cern.ch", 9999), #FI
+    ("128.141.41.216", 10000), #BA
+    ("194.12.164.162", 10000), #PG
+    #("127.0.0.1", 8888),
 ]
 
 def send_command(run_type, cmd):
